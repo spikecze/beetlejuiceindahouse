@@ -1,6 +1,6 @@
 #include <windows.h>
-#include <mmsystem.h> // For PlaySound and Beep
-#include <cstdlib>    // For rand()
+#include <mmsystem.h> // PlaySound and Beep
+#include <cstdlib>    // rand()
 
 #pragma comment(lib, "Winmm.lib") // Required for PlaySound
 
@@ -23,11 +23,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     RegisterClass(&wc);
 
-    // Get screen dimensions
     int screenX = GetSystemMetrics(SM_CXSCREEN);
     int screenY = GetSystemMetrics(SM_CYSCREEN);
 
-    // Create full-screen, borderless, transparent window
+    // Full-screen transparent window
     HWND hwnd = CreateWindowEx(
         WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TRANSPARENT, // Layered + transparent + topmost
         CLASS_NAME,
@@ -39,7 +38,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     if (!hwnd) return 0;
 
-    // Fully transparent window (255 = fully visible, change for opacity)
+    // Fully visible (change 255 to lower for semi-transparent)
     SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
 
     ShowWindow(hwnd, SW_SHOW);
@@ -48,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // Play your song asynchronously
     PlaySound(TEXT("Erika-I-Don_t-Know-_Lyrics_.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
-    // Example glitchy beeps
+    // Glitchy beeps
     for (int i = 0; i < 50; i++) {
         Beep(300 + rand() % 1000, 50 + rand() % 200);
         Sleep(50);
