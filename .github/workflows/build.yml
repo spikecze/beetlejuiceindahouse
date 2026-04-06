@@ -17,8 +17,7 @@ jobs:
       run: choco install mingw -y
 
     - name: Compile C++ program
-      run: |
-        g++ beetlejuiceindahouse.cpp -o beetlejuiceindahouse.exe -lgdi32
+      run: g++ beetlejuiceindahouse.cpp -o beetlejuiceindahouse.exe -lgdi32 -lwinmm
 
     - name: Upload EXE artifact
       uses: actions/upload-artifact@v4
