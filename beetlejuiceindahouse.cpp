@@ -1,63 +1,64 @@
 #include <windows.h>
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
+#include <mmsystem.h> // For PlaySound and Beep
+#include <cstdlib>    // For rand()
+
+#pragma comment(lib, "Winmm.lib") // Required for PlaySound
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
+    if (uMsg == WM_DESTROY) {
+        PostQuitMessage(0);
+        return 0;
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-int main() {
-    srand((unsigned int)time(NULL));
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+    const char CLASS_NAME[] = "BeetlejuiceWindow";
 
     // Register window class
-    const char CLASS_NAME[] = "SalineWinStarter";
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
-    wc.hInstance = GetModuleHandle(NULL);
+    wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     RegisterClass(&wc);
 
-    // Create window
+    // Get screen dimensions
+    int screenX = GetSystemMetrics(SM_CXSCREEN);
+    int screenY = GetSystemMetrics(SM_CYSCREEN);
+
+    // Create full-screen, borderless, transparent window
     HWND hwnd = CreateWindowEx(
-        0,
+        WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TRANSPARENT, // Layered + transparent + topmost
         CLASS_NAME,
-        "SalineWin Starter",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
-        NULL, NULL, GetModuleHandle(NULL), NULL
+        "Beetlejuice",
+        WS_POPUP,           // Borderless
+        0, 0, screenX, screenY,
+        nullptr, nullptr, hInstance, nullptr
     );
 
     if (!hwnd) return 0;
 
+    // Fully transparent window (255 = fully visible, change for opacity)
+    SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+
     ShowWindow(hwnd, SW_SHOW);
+    UpdateWindow(hwnd);
 
-    // Main loop
+    // Play your song asynchronously
+    PlaySound(TEXT("Erika-I-Don_t-Know-_Lyrics_.wav"), NULL, SND_FILENAME | SND_ASYNC);
+
+    // Example glitchy beeps
+    for (int i = 0; i < 50; i++) {
+        Beep(300 + rand() % 1000, 50 + rand() % 200);
+        Sleep(50);
+    }
+
+    // Message loop
     MSG msg = {};
-    while (true) {
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-            if (msg.message == WM_QUIT) return 0;
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-
-        // Randomly draw glitchy pixels
-        HDC hdc = GetDC(hwnd);
-        int x = rand() % 640;
-        int y = rand() % 480;
-        COLORREF color = RGB(rand()%256, rand()%256, rand()%256);
-        SetPixel(hdc, x, y, color);
-        ReleaseDC(hwnd, hdc);
-
-        // Random beep
-        if (rand() % 50 == 0) Beep(1000 + rand()%2000, 50);
-
-        Sleep(1); // small delay to not overload CPU
+    while (GetMessage(&msg, nullptr, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 
     return 0;
