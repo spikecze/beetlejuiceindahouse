@@ -1,0 +1,27 @@
+name: Build Beetlejuice EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install MinGW
+      run: choco install mingw -y
+
+    - name: Compile C++ program
+      run: |
+        g++ beetlejuiceindahouse.cpp -o beetlejuiceindahouse.exe -lgdi32
+
+    - name: Upload EXE artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: beetlejuiceindahouse-exe
+        path: beetlejuiceindahouse.exe
